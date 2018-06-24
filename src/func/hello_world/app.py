@@ -4,7 +4,7 @@ import requests
 
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    """Sample pure Lambda function.
 
     Arguments:
         event LambdaEvent -- Lambda Event received from Invoke API

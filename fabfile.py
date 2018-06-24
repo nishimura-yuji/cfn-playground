@@ -1,7 +1,7 @@
 """fabfile for cloudformation."""
 from fabric.api import local, lcd, settings, abort, shell_env, task
 from fabric.contrib.console import confirm
-from fab import lambda_func
+from fab import lambda_func, cfn
 
 
 CFN = 'aws cloudformation'
