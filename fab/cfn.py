@@ -5,6 +5,13 @@ from fabric.api import local, task
 CFN = 'aws cloudformation'
 
 
+@task(alias='ck')
+def check_template(template_path):
+    """templateファイルをチェック."""
+    cmd = f'cfn-lint --template {template_path}'
+    local(cmd)
+
+
 @task(alias='destack')
 def describe_stack(stack_name):
     """スタックの概要."""
