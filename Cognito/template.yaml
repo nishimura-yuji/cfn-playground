@@ -1,8 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "Example template including Cognito Identity Pool and User Pool."
-Parameters:
-  EmailIdentityArn:
-    Type: String
 Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
@@ -19,9 +16,6 @@ Resources:
       - preferred_username
       AutoVerifiedAttributes:
       - email
-      EmailConfiguration:
-        SourceArn:
-          Ref: EmailIdentityArn
       Policies:
         PasswordPolicy:
           MinimumLength: 8

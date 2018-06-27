@@ -5,6 +5,19 @@ from fabric.api import local, task
 CFN = 'aws cloudformation'
 
 
+@task(alias='mk')
+def create_stack(stack_name, template_path):
+    """スタック作成."""
+    cmd = f'{CFN} create-stack '\
+          f'--stack-name {stack_name} '\
+          f'--template-body file://{template_path} '\
+          '--capabilities CAPABILITY_IAM'
+    cmd_wait = f'{CFN} wait stack-create-complete '\
+               f'--stack-name {stack_name}'
+    local(cmd)
+    local(cmd_wait)
+
+
 @task(alias='ck')
 def check_template(template_path):
     """templateファイルをチェック."""
@@ -12,7 +25,7 @@ def check_template(template_path):
     local(cmd)
 
 
-@task(alias='destack')
+@task(alias='desc')
 def describe_stack(stack_name):
     """スタックの概要."""
     cmd = f'{CFN} describe-stacks '\
@@ -21,7 +34,7 @@ def describe_stack(stack_name):
     local(cmd)
 
 
-@task(alias='lstack')
+@task(alias='ls')
 def list_stack():
     """スタック一覧."""
     cmd = f'{CFN} describe-stacks | grep -E  "StackName|StackStatus"'
@@ -29,7 +42,7 @@ def list_stack():
     print(r.stdout)
 
 
-@task(alias='destack')
+@task(alias='deta')
 def detail_stack(stack_name):
     """スタック詳細."""
     cmd = f'{CFN} describe-stacks '\
@@ -44,7 +57,7 @@ def stack_resources(stack_name):
     local(cmd)
 
 
-@task(alias='delstack')
+@task(alias='dels')
 def del_stack(stack_name):
     """スタック削除."""
     cmd = f'{CFN} delete-stack '\
