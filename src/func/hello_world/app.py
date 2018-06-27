@@ -1,6 +1,7 @@
 import json
 
 import requests
+import OpenSSL
 
 
 def lambda_handler(event, context):

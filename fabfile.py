@@ -32,12 +32,18 @@ def test():
 
 
 @task()
-def build(build_path, func_name):
+def build(func_name):
     """依存ファイルDL."""
-    lambda_func.build(build_path, func_name)
+    lambda_func.build(func_name)
 
-# @task()
-# def package():
 
-# @task()
-# def deploy():
+@task()
+def package(template_path):
+    """package."""
+    lambda_func.package(template_path)
+
+
+@task()
+def deploy(stack_name):
+    """deploy."""
+    lambda_func.deploy(stack_name)
