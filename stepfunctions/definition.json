@@ -1,0 +1,15 @@
+{
+    "Comment": "test",
+    "StartAt": "fetchCSV",
+    "States": {
+        "FetchCSV": {
+            "Type": "Task",
+            "Resource": "hoge",
+            "Next": "ParseData"
+        },
+        "ParaseData": {
+            "Type": "Task",
+            "Resource": ""
+        }
+    }
+}

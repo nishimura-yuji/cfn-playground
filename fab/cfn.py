@@ -97,7 +97,6 @@ def event_stack(stack_name):
     """スタックイベント."""
     q = """
     {
-        AStackName: StackName,
         LogicalResourceId: LogicalResourceId,
         LogicalResourceId: LogicalResourceId,
         ResourceStatus: ResourceStatus,

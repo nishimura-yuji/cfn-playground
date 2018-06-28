@@ -1,0 +1,16 @@
+Resources:
+  InvokeLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: StepFunctionsAssumeRolePolicy
+            Effect: Allow
+            Principal:
+              Service:
+                - !Sub states.${AWS.Region}.amazon.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
