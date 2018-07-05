@@ -6,7 +6,7 @@ CFN = 'aws cloudformation'
 
 
 @task(alias='mk')
-def create_stack(stack_name, template_path):
+def create_stack(stack_name, template_path, *args):
     """stack_name,template_path:スタック作成."""
     cmd = f'{CFN} create-stack '\
           f'--stack-name {stack_name} '\
@@ -16,6 +16,7 @@ def create_stack(stack_name, template_path):
                f'--stack-name {stack_name}'
     local(cmd)
     local(cmd_wait)
+    event_stack(stack_name)
 
 
 @task(alias='mkch')
@@ -60,7 +61,7 @@ def describe_change_set(stack_name, set_name):
     local(cmd)
 
 
-@task(alias='exech')
+@task(alias='exe')
 def exe_change_set(stack_name, set_name):
     """stack_name,set_name:変更セット実行."""
     cmd = f'{CFN} execute-change-set '\
@@ -107,7 +108,7 @@ def detail_stack(stack_name):
     local(cmd)
 
 
-@task(alias='event')
+@task(alias='less')
 def event_stack(stack_name):
     """stack_name:スタックイベント."""
     q = """
@@ -115,8 +116,8 @@ def event_stack(stack_name):
         LogicalResourceId: LogicalResourceId,
         LogicalResourceId: LogicalResourceId,
         ResourceStatus: ResourceStatus,
-        Timestamp: Timestamp,
-        ResourceType: ResourceType
+        ResourceType: ResourceType,
+        Reason: ResourceStatusReason
     }
     """
     cmd = f'{CFN} describe-stack-events '\
@@ -133,7 +134,7 @@ def stack_resources(stack_name):
     local(cmd)
 
 
-@task(alias='dels')
+@task(alias='del')
 def del_stack(stack_name):
     """stack_name:スタック削除."""
     cmd = f'{CFN} delete-stack '\
