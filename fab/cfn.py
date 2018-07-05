@@ -1,36 +1,77 @@
 """fabric for cfn."""
 from fabric.api import local, task
 import secrets
+import boto3
 
 CFN = 'aws cloudformation'
 
 
+# @task(alias='mk')
+# def create_stack(stack_name, template_path, *args):
+#     """stack_name,template_path:スタック作成."""
+#     cmd = f'{CFN} create-stack '\
+#           f'--stack-name {stack_name} '\
+#           f'--template-body file://{template_path} '\
+#           '--capabilities CAPABILITY_IAM '
+#     cmd_wait = f'{CFN} wait stack-create-complete '\
+#                f'--stack-name {stack_name}'
+# #     local(cmd)
+#     local(cmd_wait)
+#     event_stack(stack_name)
+
+
 @task(alias='mk')
-def create_stack(stack_name, template_path, *args):
-    """stack_name,template_path:スタック作成."""
-    cmd = f'{CFN} create-stack '\
-          f'--stack-name {stack_name} '\
-          f'--template-body file://{template_path} '\
-          '--capabilities CAPABILITY_IAM'
+def create_stack(stack_name, template_path, **kwargs):
+    """stack_name,template_path,key=val:スタック作成."""
+    cf_conn = boto3.client('cloudformation')
+
+    template = open(template_path, 'r')
+    params = []
+    if len(kwargs):
+        for key, value in kwargs.items():
+            add = {
+                'ParameterKey': key,
+                'ParameterValue': value
+            }
+            params.append(add)
+
+    cf_conn.create_stack(
+        StackName=stack_name,
+        TemplateBody=template.read(),
+        Parameters=params,
+        Capabilities=['CAPABILITY_IAM'])
     cmd_wait = f'{CFN} wait stack-create-complete '\
                f'--stack-name {stack_name}'
-    local(cmd)
     local(cmd_wait)
     event_stack(stack_name)
 
 
 @task(alias='mkch')
-def create_change_set(stack_name, template_path):
-    """stack_name,template_path:変更セットを作成."""
+def create_change_set(stack_name, template_path, **kwargs):
+    """stack_name,template_path,key=val:変更セットを作成."""
     suffix = secrets.token_hex(4)
-    cmd = f'{CFN} create-change-set '\
-          f'--stack-name {stack_name} '\
-          f'--template-body file://{template_path} '\
-          f'--change-set-name {stack_name}{suffix} '\
-          '--capabilities CAPABILITY_IAM'
+
+    cf_conn = boto3.client('cloudformation')
+
+    template = open(template_path, 'r')
+    params = []
+    if len(kwargs):
+        for key, value in kwargs.items():
+            add = {
+                'ParameterKey': key,
+                'ParameterValue': value
+            }
+            params.append(add)
+
+    cf_conn.create_change_set(
+        StackName=stack_name,
+        TemplateBody=template.read(),
+        Parameters=params,
+        Capabilities=['CAPABILITY_IAM'],
+        ChangeSetName=f'{stack_name}{suffix}')
+
     cmd_wait = f'{CFN} wait change-set-create-complete '\
                f'--change-set-name {stack_name}{suffix}'
-    local(cmd)
     local(cmd_wait)
 
 
