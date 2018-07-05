@@ -1,30 +1,18 @@
 """fabric for cfn."""
-from fabric.api import local, task
+from fabric.api import local, task, settings
 import secrets
 import boto3
 
 CFN = 'aws cloudformation'
 
 
-# @task(alias='mk')
-# def create_stack(stack_name, template_path, *args):
-#     """stack_name,template_path:スタック作成."""
-#     cmd = f'{CFN} create-stack '\
-#           f'--stack-name {stack_name} '\
-#           f'--template-body file://{template_path} '\
-#           '--capabilities CAPABILITY_IAM '
-#     cmd_wait = f'{CFN} wait stack-create-complete '\
-#                f'--stack-name {stack_name}'
-# #     local(cmd)
-#     local(cmd_wait)
-#     event_stack(stack_name)
-
-
 @task(alias='mk')
 def create_stack(stack_name, template_path, **kwargs):
     """stack_name,template_path,key=val:スタック作成."""
-    cf_conn = boto3.client('cloudformation')
+    # 文法チェック
+    check_template(template_path)
 
+    cf_conn = boto3.client('cloudformation')
     template = open(template_path, 'r')
     params = []
     if len(kwargs):
@@ -34,7 +22,6 @@ def create_stack(stack_name, template_path, **kwargs):
                 'ParameterValue': value
             }
             params.append(add)
-
     cf_conn.create_stack(
         StackName=stack_name,
         TemplateBody=template.read(),
@@ -42,7 +29,8 @@ def create_stack(stack_name, template_path, **kwargs):
         Capabilities=['CAPABILITY_IAM'])
     cmd_wait = f'{CFN} wait stack-create-complete '\
                f'--stack-name {stack_name}'
-    local(cmd_wait)
+    with settings(warn_only=True):
+        local(cmd_wait)
     event_stack(stack_name)
 
 
@@ -72,7 +60,8 @@ def create_change_set(stack_name, template_path, **kwargs):
 
     cmd_wait = f'{CFN} wait change-set-create-complete '\
                f'--change-set-name {stack_name}{suffix}'
-    local(cmd_wait)
+    with settings(warn_only=True):
+        local(cmd_wait)
 
 
 @task(alias='lsc')

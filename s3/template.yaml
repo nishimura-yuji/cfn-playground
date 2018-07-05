@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "S3 Bucket"
-# Parameters:
-#   SPABucketName:
-#     Type: String
-#     Description: Enter Bucket Name for SPA
+Parameters:
+  SPABucketName:
+    Type: String
+    Description: Enter Bucket Name for SPA
 
 Resources:
   S3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'test-s3'
+      BucketName: !Ref SPABucketName
