@@ -42,12 +42,21 @@ def list_change_set(stack_name):
     local(cmd)
 
 
-@task(alias='descch')
+@task(alias='cless')
 def describe_change_set(stack_name, set_name):
     """stack_name,set_name:変更セット確認."""
+    q = """
+    {
+        name: StackName,
+        status: StackStatus
+    }
+    """
+
     cmd = f'{CFN} describe-change-set '\
         f'--stack-name {stack_name} '\
-        f'--change-set-name {set_name}'
+        f'--change-set-name {set_name} '\
+        # '--output table '\
+    # f'--query "Changes[].{q}"'
     local(cmd)
 
 
@@ -111,7 +120,8 @@ def event_stack(stack_name):
     }
     """
     cmd = f'{CFN} describe-stack-events '\
-        f'--stack-name {stack_name} --output table'\
+        f'--stack-name {stack_name} '\
+        '--output table '\
         f'--query "StackEvents[].{q}"'
     local(cmd)
 
