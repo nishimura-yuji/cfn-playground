@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "AWS WAF"
 Resources:
-  SPAWAF:
+  SPAWAFIPSet:
     Type: "AWS::WAF::IPSet"
     Properties: 
       Name: "IPSet for blacklisted IP adresses"
@@ -12,3 +12,14 @@ Resources:
         - 
           Type: "IPV4"
           Value: "192.0.7.0/24"
+  SAPRule:
+    Type: "AWS::WAF::Rule"
+    Properties: 
+      MetricName: !Ref AWS::StackName
+      Name: !Ref AWS::StackName
+      Predicates:
+      - 
+        DataId:
+          Ref: "SPAWAFIPSet"
+        Negated: false
+        Type: "IPMatch"
