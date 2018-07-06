@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+
+Parameters:
+  SPATableName:
+    Type: String
+    Default: "myTableName"
+    Description: "Set Enter Table Name"
+
+Resources: 
+  myDynamoDBTable: 
+    Type: "AWS::DynamoDB::Table"
+    Properties: 
+      AttributeDefinitions: 
+        - 
+          AttributeName: "Album"
+          AttributeType: "S"
+        - 
+          AttributeName: "Artist"
+          AttributeType: "N"
+      KeySchema: 
+        - 
+          AttributeName: "Album"
+          KeyType: "HASH"
+        - 
+          AttributeName: "Artist"
+          KeyType: "RANGE"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: !Ref SPATableName
+
+      LocalSecondaryIndexes:
+        - 
+          IndexName: "myLSI"
+          KeySchema: 
+            - 
+              AttributeName: "Album"
+              KeyType: "HASH"
+            - 
+              AttributeName: "Artist"
+              KeyType: "RANGE"
+          Projection: 
+            ProjectionType: "KEYS_ONLY"

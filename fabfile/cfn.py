@@ -38,7 +38,7 @@ def create_stack(stack_name, template_path, **kwargs):
 def create_change_set(stack_name, template_path, **kwargs):
     """stack_name,template_path,key=val:変更セットを作成."""
     suffix = secrets.token_hex(4)
-
+    change_set_name = f'{stack_name}-{suffix}'
     cf_conn = boto3.client('cloudformation')
 
     template = open(template_path, 'r')
@@ -56,13 +56,13 @@ def create_change_set(stack_name, template_path, **kwargs):
         TemplateBody=template.read(),
         Parameters=params,
         Capabilities=['CAPABILITY_IAM'],
-        ChangeSetName=f'{stack_name}-{suffix}')
+        ChangeSetName=change_set_name)
 
     cmd_wait = f'{CFN} wait change-set-create-complete '\
-               f'--change-set-name {stack_name}-{suffix}'
+               f'--change-set-name {change_set_name}'
     with settings(warn_only=True):
         local(cmd_wait)
-    describe_change_set(stack_name, {stack_name}-{suffix})
+    describe_change_set(stack_name, change_set_name)
 
 
 @task(alias='lsc')
