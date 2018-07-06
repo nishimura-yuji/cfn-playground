@@ -56,12 +56,13 @@ def create_change_set(stack_name, template_path, **kwargs):
         TemplateBody=template.read(),
         Parameters=params,
         Capabilities=['CAPABILITY_IAM'],
-        ChangeSetName=f'{stack_name}{suffix}')
+        ChangeSetName=f'{stack_name}-{suffix}')
 
     cmd_wait = f'{CFN} wait change-set-create-complete '\
-               f'--change-set-name {stack_name}{suffix}'
+               f'--change-set-name {stack_name}-{suffix}'
     with settings(warn_only=True):
         local(cmd_wait)
+    describe_change_set(stack_name, {stack_name}-{suffix})
 
 
 @task(alias='lsc')

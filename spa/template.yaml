@@ -1,21 +1,75 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Static contents distribution using S3 and CloudFront.
+Description: Static contents distribution using S3 and CloudFront and WAF.
  
+Parameters:
+  AllowIP:
+    Type: String
+    Default: "14.10.58.192/32"
+    Description: "Allow IP"
+  
+  SPABucketName:
+    Type: String
+    Description: Enter Bucket Name for SPA
+
+  SPAIPSetRule:
+    Type: String
+    Default: "SPAIPRule"
+    Description: "Rule Name"
+
 Resources:
+  SPAWAFIPSet:
+    Type: "AWS::WAF::IPSet"
+    Properties: 
+      Name: "IPSet for Whitelisted IP adresses"
+      IPSetDescriptors: 
+        - 
+          Type: "IPV4"
+          Value: !Ref AllowIP
+
+  SPARule:
+    Type: "AWS::WAF::Rule"
+    Properties: 
+      MetricName: !Ref SPAIPSetRule
+      Name: !Ref SPAIPSetRule
+      Predicates:
+      - 
+        DataId:
+          Ref: "SPAWAFIPSet"
+        Negated: false
+        Type: "IPMatch"
+
+  SPAWebACL: 
+    Type: "AWS::WAF::WebACL"
+    Properties: 
+      Name: "WebACL for SPA"
+      DefaultAction:
+        # BLOCK or ALLOW or COUNT
+        Type: "BLOCK"
+      MetricName: "SPAWebACL"
+      Rules: 
+        - 
+          Action: 
+            Type: "ALLOW"
+          Priority: 1
+          RuleId: !Ref SPARule
+      
+
   # S3 bucket contains static contents
-  AssetsBucket:
+  SPABucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
+    # DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref SPABucketName
   # S3 bucket policy to allow access from CloudFront OAI
-  AssetsBucketPolicy:
+  SPABucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref AssetsBucket
+      Bucket: !Ref SPABucket
       PolicyDocument:
         Statement:
           - Action: s3:GetObject
             Effect: Allow
-            Resource: !Sub arn:aws:s3:::${AssetsBucket}/*
+            Resource: !Sub arn:aws:s3:::${SPABucket}/*
             Principal:
               AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
  
@@ -24,9 +78,10 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        WebACLId: !Ref SPAWebACL
         Origins:
         - Id: S3Origin
-          DomainName: !GetAtt AssetsBucket.DomainName
+          DomainName: !GetAtt SPABucket.DomainName
           S3OriginConfig:
             OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
         Enabled: true
@@ -37,7 +92,6 @@ Resources:
           ForwardedValues:
             QueryString: false
           ViewerProtocolPolicy: redirect-to-https
-        # 参考サイト：https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/quickref-cloudfront.html#scenario-cloudfront-customorigin
         CustomErrorResponses:
         - ErrorCachingMinTTL: 0
           ErrorCode: 403
@@ -48,7 +102,19 @@ Resources:
     Properties:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !Ref AWS::StackName
- 
+
 Outputs:
+  RuleID:
+    Description: The Rule ID
+    Value: !Ref SPARule
+
+  IPSetLogicalID:
+    Description: The Logical ID
+    Value: !Ref SPAWAFIPSet
+
+  WEBACLID:
+    Description: The Logical ID
+    Value: !Ref SPAWebACL
+
   URL:
     Value: !Join [ "", [ "https://", !GetAtt [ AssetsDistribution, DomainName ]]]

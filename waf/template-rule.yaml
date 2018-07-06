@@ -8,17 +8,6 @@ Parameters:
     Description: "Rule Name"
 
 Resources:
-  SPAWAFIPSet:
-    Type: "AWS::WAF::IPSet"
-    Properties: 
-      Name: "IPSet for blacklisted IP adresses"
-      IPSetDescriptors: 
-        - 
-          Type: "IPV4"
-          Value: "192.0.2.44/32"
-        - 
-          Type: "IPV4"
-          Value: "192.0.7.0/24"
   SAPRule:
     Type: "AWS::WAF::Rule"
     Properties: 
@@ -26,15 +15,10 @@ Resources:
       Name: !Ref SPAIPSetRule
       Predicates:
       - 
-        DataId:
-          Ref: "SPAWAFIPSet"
+        DataId: "ff8fef89-620a-4a75-9db3-ff8c8bf4035a"
         Negated: false
         Type: "IPMatch"
 Outputs:
   RuleID:
     Description: The Rule ID
     Value: !Ref SAPRule
-
-  IPSetLogicalID:
-    Description: The Logical ID
-    Value: !Ref SPAWAFIPSet

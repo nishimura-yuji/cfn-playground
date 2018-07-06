@@ -2,6 +2,11 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "AWS WAF"
 
 Parameters:
+  AllowIP:
+    Type: String
+    Default: "14.10.58.192/32"
+    Description: "Allow IP"
+
   SPAIPSetRule:
     Type: String
     Default: "SPAIPRule"
@@ -15,11 +20,11 @@ Resources:
       IPSetDescriptors: 
         - 
           Type: "IPV4"
-          Value: "192.0.2.44/32"
+          Value: !Ref AllowIP
         - 
           Type: "IPV4"
           Value: "192.0.7.0/24"
-  SAPRule:
+  SPARule:
     Type: "AWS::WAF::Rule"
     Properties: 
       MetricName: !Ref SPAIPSetRule
@@ -30,11 +35,31 @@ Resources:
           Ref: "SPAWAFIPSet"
         Negated: false
         Type: "IPMatch"
+
+  SPAWebACL: 
+    Type: "AWS::WAF::WebACL"
+    Properties: 
+      Name: "WebACL for SPA"
+      DefaultAction:
+        # BLOCK or ALLOW or COUNT
+        Type: "BLOCK"
+      MetricName: "SPAWebACL"
+      Rules: 
+        - 
+          Action: 
+            Type: "ALLOW"
+          Priority: 1
+          RuleId: !Ref SPARule
+          
 Outputs:
   RuleID:
     Description: The Rule ID
-    Value: !Ref SAPRule
+    Value: !Ref SPARule
 
   IPSetLogicalID:
     Description: The Logical ID
     Value: !Ref SPAWAFIPSet
+
+  WEBACLID:
+    Description: The Logical ID
+    Value: !Ref SPAWebACL

@@ -1,12 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "AWS WAF"
-
-Parameters:
-  SPAIPSetRule:
-    Type: String
-    Default: "SPAIPRule"
-    Description: "Rule Name"
-
 Resources:
   SPAWAFIPSet:
     Type: "AWS::WAF::IPSet"
@@ -19,22 +12,8 @@ Resources:
         - 
           Type: "IPV4"
           Value: "192.0.7.0/24"
-  SAPRule:
-    Type: "AWS::WAF::Rule"
-    Properties: 
-      MetricName: !Ref SPAIPSetRule
-      Name: !Ref SPAIPSetRule
-      Predicates:
-      - 
-        DataId:
-          Ref: "SPAWAFIPSet"
-        Negated: false
-        Type: "IPMatch"
-Outputs:
-  RuleID:
-    Description: The Rule ID
-    Value: !Ref SAPRule
 
+Outputs:
   IPSetLogicalID:
     Description: The Logical ID
     Value: !Ref SPAWAFIPSet
