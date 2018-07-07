@@ -1,19 +1,36 @@
 """fabric for cfn."""
 from fabric.api import local, task, settings
+from awscli.customizations.cloudformation.yamlhelper import yaml_parse
 import secrets
 import boto3
+import os
 
 CFN = 'aws cloudformation'
+
+
+@task(alias='mkt')
+def combine_template(template_path):
+    """templateを読み込みくっつける."""
+    with open(template_path, 'r+') as file:
+        data = yaml_parse(file.read())
+    for i in data['Resources']:
+        rootpath = template_path.split('/')[0]
+        path = f'{rootpath}/_template-{i}.yaml'
+        if os.path.exists(path):
+            with open(path) as subfile:
+                subdata = yaml_parse(subfile.read())
+                data['Resources'][i].update(subdata)
+    check_template(str(data))
+    return str(data)
 
 
 @task(alias='mk')
 def create_stack(stack_name, template_path, **kwargs):
     """stack_name,template_path,key=val:スタック作成."""
-    # 文法チェック
-    check_template(template_path)
-
     cf_conn = boto3.client('cloudformation')
-    template = open(template_path, 'r')
+
+    # テンプレート結合
+    template = combine_template(template_path)
     params = []
     if len(kwargs):
         for key, value in kwargs.items():
@@ -24,7 +41,7 @@ def create_stack(stack_name, template_path, **kwargs):
             params.append(add)
     cf_conn.create_stack(
         StackName=stack_name,
-        TemplateBody=template.read(),
+        TemplateBody=template,
         Parameters=params,
         Capabilities=['CAPABILITY_IAM'])
     cmd_wait = f'{CFN} wait stack-create-complete '\

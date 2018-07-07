@@ -18,8 +18,7 @@ Conditions:
   IsDevelopment: !Equals [ !Ref Env, dev ]
 
 Resources:
-  S3Bucket:
+  test:
     Condition: IsDevelopment
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Sub ${SPABucketName}
+  test2:
+    Condition: IsDevelopment

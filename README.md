@@ -13,3 +13,19 @@ $ fab -l
 ```
 
 で実行関数を表示してくれる
+
+## テンプレート作成方針
+
+- テンプレートのパラメータには必ず環境設定を入れる
+
+```
+Parameters:
+  StageName:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stage
+      - prod
+    Description: デプロイ対象のステージ名
+```

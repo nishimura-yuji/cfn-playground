@@ -1,5 +1,5 @@
 """fabric for lambda func."""
-from fabric.api import local, lcd, settings, task
+from fabric.api import local, settings, task
 
 CFN = 'aws cloudformation'
 S3_BUCKET = 'test-sam-cli'
