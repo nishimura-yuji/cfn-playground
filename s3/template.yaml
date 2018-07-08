@@ -17,7 +17,7 @@ Parameters:
 
 Conditions:
   IsDevelopment: !Equals [ !Ref Env, dev ]
-  setBucketName: !Not [!Equals [!Ref SPABucketName , NoValue]]
+  setBucketName: !Not [!Equals [!Ref SPABucketName , NoValue]] #param何も指定ないときtrue
 
 Resources:
   S3Bucket:
