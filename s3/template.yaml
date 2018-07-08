@@ -3,6 +3,7 @@ Description: "S3 Bucket"
 Parameters:
   SPABucketName:
     Type: String
+    Default: NoValue
     Description: Enter Bucket Name for SPA
 
   Env:
@@ -16,10 +17,15 @@ Parameters:
 
 Conditions:
   IsDevelopment: !Equals [ !Ref Env, dev ]
+  setBucketName: !Not [!Equals [!Ref SPABucketName , NoValue]]
 
 Resources:
   S3Bucket:
     Condition: IsDevelopment
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub ${SPABucketName}
+      BucketName: 
+        Fn::If:
+          - setBucketName
+          - !Sub ${SPABucketName}
+          - !Ref AWS::NoValue

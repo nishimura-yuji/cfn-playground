@@ -20,7 +20,7 @@ def combine_template(template_path):
             with open(path) as subfile:
                 subdata = yaml_parse(subfile.read())
                 data['Resources'][i].update(subdata)
-    check_template(str(data))
+    # check_template(str(data))
     return str(data)
 
 
