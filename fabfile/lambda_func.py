@@ -34,3 +34,10 @@ def deploy(stack_name):
         f'--stack-name {stack_name} '\
         '--capabilities CAPABILITY_IAM'
     local(cmd)
+
+
+@task
+def deploys(stack_name, template_path):
+    """Lambda deply."""
+    package(template_path)
+    deploy(stack_name)

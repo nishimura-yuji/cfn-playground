@@ -23,7 +23,7 @@ Resources:
               callback(null, "Hello World!");
           };
       Runtime: "nodejs4.3"
-      Timeout: "25"
+      Timeout: 25
 
   StatesExecutionRole:
     Type: "AWS::IAM::Role"

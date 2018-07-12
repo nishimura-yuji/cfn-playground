@@ -10,7 +10,12 @@ CFN = 'aws cloudformation'
 
 @task(alias='mkt')
 def combine_template(template_path):
-    """templateを読み込みくっつける."""
+    """templateを読み込みくっつける.
+
+    ルール
+    - 子テンプレートは親テンプレートと同じディレクトリにある
+    - 子テンプレートおファイル名は_template-{リソース名}.yaml
+    """
     with open(template_path, 'r+') as file:
         data = yaml_parse(file.read())
     for i in data['Resources']:

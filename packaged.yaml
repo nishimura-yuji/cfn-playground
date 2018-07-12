@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  DynamoDBTable:
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+    Type: AWS::DynamoDB::Table
+  ProcessDynamoDBStream:
+    Properties:
+      CodeUri: s3://test-sam-cli/2b1e1cee2067c73bf398c5d4ed6bc952
+      Events:
+        Stream:
+          Properties:
+            BatchSize: 100
+            StartingPosition: TRIM_HORIZON
+            Stream:
+              Fn::GetAtt:
+              - DynamoDBTable
+              - StreamArn
+          Type: DynamoDB
+      FunctionName: test-dynamodb-stream
+      Handler: put_json.lambda_handler
+      Policies:
+      - AWSLambdaDynamoDBExecutionRole
+      - AmazonS3FullAccess
+      Runtime: python3.6
+    Type: AWS::Serverless::Function
+  ProcessDynamoFuncLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/lambda/${ProcessDynamoDBStream}
+      RetentionInDays: 14
+    Type: AWS::Logs::LogGroup
+Transform: AWS::Serverless-2016-10-31
