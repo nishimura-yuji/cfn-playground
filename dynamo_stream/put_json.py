@@ -1,15 +1,16 @@
+"""json append from dynamodb."""
 import boto3
 import json
 import os
 # bucket
-BUCKET = os.getenv('BUCKET_NAME', 'lixilqrcode')
+BUCKET = os.getenv('BUCKET_NAME', 'test-qrcode')
 
 # s3
 S3 = boto3.resource('s3')
 S3CLIENT = boto3.client('s3')
 BUCKET_DATA = S3.Bucket(BUCKET)
 
-JSON_FILENAME = 'data.json'
+JSON_FILENAME = os.getenv('JSON_FILENAME', 'data.json')
 
 
 class base(object):
@@ -17,36 +18,46 @@ class base(object):
 
     def __init__(self, **kwargs):
         """Initialize setting."""
-        self.username = kwargs['username']
-        self.request_time_unix = kwargs['request_time_unix']
-        self.count = kwargs['count']
-        self.csv = kwargs['csv']
-        self.params = {
-            "username": self.username,
-            "request_time_unix": self.request_time_unix,
-            "count": self.count,
-            "csv": self.csv
-        }
+        self.params = kwargs
 
-    def get_db_data(self):
+    def get_json(self):
         """Get json file from s3."""
-        BUCKET_DATA.download_file(JSON_FILENAME, '/tmp/' + JSON_FILENAME)
-        obj = S3.Object(BUCKET, JSON_FILENAME)
-        response = obj.get()
+        self.obj = BUCKET_DATA.Object(JSON_FILENAME)
+        response = self.obj.get()
         body = response['Body'].read()
+        self.json_data = json.loads(body.decode('utf-8'))
 
-        print(type(body))
-        # => <class 'bytes'>
-
-        print(body.decode('utf-8'))
-
-    def append_json(self):
+    def append_data_to_json(self):
         """Add parameters to json."""
+        self.json_data.append(self.params)
+        print(self.json_data)
+
+    def update_json_s3(self):
+        """Update json file on S3."""
+        self.obj.put(
+            Body=json.dumps(self.json_data),
+            ContentType='application/json'
+        )
 
 
 def lambda_handler(event, context):
     """main."""
-    print(event['Records'])
+    print(event['Records'][0]['dynamodb']['NewImage'])
+    add_data = event['Records'][0]['dynamodb']['NewImage']
+    username = add_data['id']['S']
+    request_time_unix = 1531157063
+    count = 1
+    csv = "1531246040338/QRcode_uri_3a9e7f402665e249.csv"
+
+    test = base(
+        username=username,
+        request_time_unix=request_time_unix,
+        count=count,
+        csv=csv
+    )
+    test.get_json()
+    test.append_data_to_json()
+    # test.update_json_s3()
 
 
 event = {'Records': [{'eventID': '150fe8e8e674f858fd3332c274368eaa', 'eventName': 'INSERT', 'eventVersion': '1.1', 'eventSource': 'aws:dynamodb', 'awsRegion': 'ap-northeast-1', 'dynamodb': {'ApproximateCreationDateTime': 1531387980.0, 'Keys': {'id': {'S': 'huga'}},
