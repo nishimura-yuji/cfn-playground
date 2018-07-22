@@ -4,7 +4,7 @@ Description: Static contents distribution using S3 and CloudFront and WAF.
 Parameters:
   AllowIP:
     Type: String
-    Default: "0.0.0.0/0"
+    Default: "127.0.0.1/32"
     Description: "Allow IP"
   
   SPABucketName:
