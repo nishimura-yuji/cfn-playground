@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AppSync test"
+Resources:
+  testAppSync:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: "testAppSync"
+      AuthenticationType: "API_KEY"
