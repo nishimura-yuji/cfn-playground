@@ -14,7 +14,7 @@ def combine_template(template_path):
 
     ルール
     - 子テンプレートは親テンプレートと同じディレクトリにある
-    - 子テンプレートおファイル名は_template-{リソース名}.yaml
+    - 子テンプレートのファイル名は_template-{リソース名}.yaml
     """
     with open(template_path, 'r+') as file:
         data = yaml_parse(file.read())

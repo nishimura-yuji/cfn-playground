@@ -29,3 +29,53 @@ Parameters:
       - prod
     Description: デプロイ対象のステージ名
 ```
+
+- 環境依存、テンプレート間のやりとりはParamater storeを使う
+
+別テンプレートにリソース名など値を渡す
+
+```
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.250.252.0/24
+  SSMVpcId: # 渡す値をParameter Storeに保存する
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /cf-values/VpcId
+      Type: String
+      Value: !Ref 'VPC'
+```
+
+
+
+別テンプレートからリソース名など値を受け取る
+
+```
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  VpcId: # 受け取る値を定義する
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
+    Default: /cf-values/VpcId # Parameter StoreのNameを指定
+Resources:
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcId
+      CidrBlock: 10.250.252.0/28
+```
+
+または
+```{{resolve:ssm:S3AccessControl:2}}```で受け取ることができる
+
+```
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: '{{resolve:ssm:S3AccessControl:2}}'
+      CidrBlock: 10.250.252.0/28
+```
