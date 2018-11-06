@@ -8,6 +8,27 @@ import os
 CFN = 'aws cloudformation'
 
 
+@task
+def dev():
+    """環境の変数設定."""
+    os.environ['Env'] = 'itg'
+    os.environ['S3_BUCKET'] = 'itg-qrcode-lambda-deploy'
+
+
+@task
+def stg():
+    """環境の変数設定."""
+    os.environ['Env'] = 'stg'
+    os.environ['S3_BUCKET'] = 'stg-qrcode-lambda-deploy'
+
+
+@task
+def prd():
+    """環境の変数設定."""
+    os.environ['Env'] = 'prd'
+    os.environ['S3_BUCKET'] = 'prd-qrcode-lambda-deploy'
+
+
 @task(alias='mkt')
 def combine_template(template_path):
     """templateを読み込みくっつける.
@@ -85,14 +106,16 @@ def create_change_set(stack_name, template_path, **kwargs):
     with settings(warn_only=True):
         local(cmd_wait)
     describe_change_set(stack_name, change_set_name)
+    exe_change_set(stack_name, change_set_name)
 
 
 @task(alias='lsc')
 def list_change_set(stack_name):
     """stack_name:変更セット一覧."""
-    cmd = f'{CFN} list-change-sets '\
-          f'--stack-name {stack_name} ' \
-          f'--query "Summaries[]"'
+    cmd = f'''{CFN} list-change-sets \
+          --stack-name {stack_name} \
+          --query "Summaries[]"
+          '''
     local(cmd)
 
 
@@ -120,7 +143,10 @@ def exe_change_set(stack_name, set_name):
     cmd = f'{CFN} execute-change-set '\
         f'--stack-name {stack_name} '\
         f'--change-set-name {set_name}'
+    cmd_wait = f'''{CFN} wait stack-update-complete \
+               --stack-name {stack_name}'''
     local(cmd)
+    local(cmd_wait)
 
 
 @task(alias='ck')
@@ -148,16 +174,20 @@ def list_stack():
         status: StackStatus
     }
     """
-    cmd = f'{CFN} describe-stacks --output table --query "Stacks[].{q}"'
+    cmd = f'''\
+    {CFN} describe-stacks \
+    --output table \
+    --query "Stacks[].{q}"
+    '''
     r = local(cmd, capture=True)
     print(r.stdout)
 
 
-@task(alias='deta')
+@task(alias='detail')
 def detail_stack(stack_name):
     """stack_name:スタック詳細."""
-    cmd = f'{CFN} describe-stacks '\
-        f'--stack-name {stack_name}'
+    cmd = f'''{CFN} describe-stacks \
+            --stack-name {stack_name}'''
     local(cmd)
 
 
